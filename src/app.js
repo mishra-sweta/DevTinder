@@ -2,24 +2,25 @@ const express = require("express");
 
 const app = express();
 
-const { adminAuth, userAuth } = require("./middleware/auth");
+//always use try-catch if not the app.use error handler will handle it
+// app.get("/user", (req, res) => {
+//   try {
+//     throw new Error();
+//     res.send("Something with the user");
+//   } catch (error) {
+//     res.status(500).send("Something went wrong");
+//   }
+// });
 
-app.use("/admin", adminAuth); //Middleware for all admin path
-app.get("/user/login", (req, res) => {
-  res.send("Login done successfully");
+app.get("/user", (req, res) => {
+  throw new Error();
+  res.send("Something with the user");
 });
 
-//middleware used when required
-app.get("/user/getUserData", userAuth, (req, res) => {
-  res.send("User Data sent");
-});
-
-app.get("/admin/getAllData", (req, res) => {
-  res.send("All data sent to admin");
-});
-
-app.get("/admin/deleteUser", (req, res) => {
-  res.send("User deleted");
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something really  went wrong");
+  }
 });
 
 app.listen(3000, () => {
