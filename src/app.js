@@ -2,27 +2,33 @@ const express = require("express");
 
 const app = express();
 
-//always use try-catch if not the app.use error handler will handle it
-// app.get("/user", (req, res) => {
-//   try {
-//     throw new Error();
-//     res.send("Something with the user");
-//   } catch (error) {
-//     res.status(500).send("Something went wrong");
-//   }
-// });
+const { connectDB } = require("./config/database");
 
-app.get("/user", (req, res) => {
-  throw new Error();
-  res.send("Something with the user");
-});
+const User = require("./models/user");
 
-app.use("/", (err, req, res, next) => {
-  if (err) {
-    res.status(500).send("Something really  went wrong");
+app.post("/signup", async (req, res) => {
+  const user = new User({
+    firstName: "Ankita",
+    lastName: "Mishra",
+    emailId: "ankita.mishra@gmail.com",
+    password: "ankita@123",
+  });
+
+  try {
+    await user.save();
+    res.send("User added successfully");
+  } catch (error) {
+    res.status(400).send("failed to signup user");
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server is successfully listening on PORT 3000");
-});
+connectDB()
+  .then(() => {
+    console.log("Connected to the database...");
+    app.listen(3000, () => {
+      console.log("Server is successfully listening on PORT 3000");
+    });
+  })
+  .catch((err) => {
+    console.log("Couldn't connect to database");
+  });
