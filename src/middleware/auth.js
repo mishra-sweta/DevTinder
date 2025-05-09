@@ -1,23 +1,26 @@
-const adminAuth = (req, res, next) => {
-  console.log("Middleware func for auth check");
-  const token = "abcd";
-  const isAdmin = token === "abcd";
-  if (!isAdmin) {
-    res.status(401).send("Unauthorised User");
-  } else {
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+
+const userAuth = async (req, res, next) => {
+  try {
+    const cookies = req.cookies;
+    const { token } = cookies;
+    if (!token) {
+      throw new Error("Invalid token ");
+    }
+    const decodedMessage = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decodedMessage._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    req.user = user;
     next();
+  } catch (error) {
+    res.status(400).send("ERROR: " + error.message);
   }
 };
 
-const userAuth = (req, res, next) => {
-  console.log("Middleware func for auth check");
-  const token = "qwerty";
-  const isUser = token === "qwerty1";
-  if (!isUser) {
-    res.status(401).send("Unauthorised User");
-  } else {
-    next();
-  }
-};
-
-module.exports = { adminAuth, userAuth };
+module.exports = { userAuth };
