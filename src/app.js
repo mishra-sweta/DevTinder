@@ -1,5 +1,6 @@
 const express = require("express");
-
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 const app = express();
 
 const { connectDB } = require("./config/database");
@@ -10,14 +11,43 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   try {
-    if (!req.body.emailId || !req.body.password) {
-      return res.status(400).send("Missing required fields");
-    }
-    const user = new User(req.body);
+    validateSignUpData(req);
+    const { firstName, lastName, emailId, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+    });
     await user.save();
-    res.send("User added successfully");
+    res.send("User registered successfully");
   } catch (error) {
-    res.status(400).send("Failed to signup user : " + error.message);
+    res.status(400).send("ERROR : " + error.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (isPasswordCorrect) {
+      //Create a JWT token
+
+      //Add the token to a cookie and send the cookie in response to  user
+      res.send("Login Successful");
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  } catch (error) {
+    res.status(400).send("ERROR : " + error.message);
   }
 });
 
