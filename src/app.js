@@ -9,20 +9,18 @@ const User = require("./models/user");
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    const user = new User(req.body);
     await user.save();
     res.send("User added successfully");
   } catch (error) {
-    res.status(400).send("failed to signup user");
+    res.status(400).send("Failed to signup user : " + error.message);
   }
 });
 
 app.get("/userByEmail", async (req, res) => {
-  const user = await User.findOne({ emailId: req.body.emailId });
-
   try {
+    const user = await User.findOne({ emailId: req.body.emailId });
     if (user.length === 0) {
       res.status(404).send("User not found");
     } else {
@@ -34,9 +32,8 @@ app.get("/userByEmail", async (req, res) => {
 });
 
 app.get("/feed", async (req, res) => {
-  const users = await User.find({});
-
   try {
+    const users = await User.find({});
     if (users.length === 0) {
       res.status(404).send("No users");
     } else {
@@ -48,10 +45,9 @@ app.get("/feed", async (req, res) => {
 });
 
 app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  await User.findByIdAndDelete(userId);
-
   try {
+    const userId = req.body.userId;
+    await User.findByIdAndDelete(userId);
     res.send("User deleted successfully");
   } catch (error) {
     res.status(400).send("Something went wrong");
@@ -59,15 +55,16 @@ app.delete("/user", async (req, res) => {
 });
 
 app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
-  const data = req.body;
-
-  await User.findByIdAndUpdate(userId, data);
-
   try {
+    const userId = req.body.userId;
+    const data = req.body;
+
+    await User.findByIdAndUpdate(userId, data, {
+      runValidators: true,
+    });
     res.send("User updated successfully");
   } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("Something went wrong " + error.message);
   }
 });
 
