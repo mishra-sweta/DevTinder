@@ -10,6 +10,9 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   try {
+    if (!req.body.emailId || !req.body.password) {
+      return res.status(400).send("Missing required fields");
+    }
     const user = new User(req.body);
     await user.save();
     res.send("User added successfully");
@@ -54,17 +57,30 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params?.userId;
     const data = req.body;
-
+    const ALLOWED_FIELDS = [
+      "userId",
+      "photoURL",
+      "about",
+      "age",
+      "gender",
+      "skills",
+    ];
+    const isAllowed = Object.keys(req.body).every((k) =>
+      ALLOWED_FIELDS.includes(k)
+    );
+    if (!isAllowed) {
+      throw new Error("Update not allowed");
+    }
     await User.findByIdAndUpdate(userId, data, {
       runValidators: true,
     });
     res.send("User updated successfully");
   } catch (error) {
-    res.status(400).send("Something went wrong " + error.message);
+    res.status(400).send(error.message);
   }
 });
 
