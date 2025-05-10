@@ -1,6 +1,6 @@
 const validator = require("validator");
 
-const validateSignUpData = async (req) => {
+const validateSignUpData = (req) => {
   const { firstName, lastName, emailId, password } = req.body;
 
   if (!firstName || !lastName) {
@@ -20,4 +20,36 @@ const validateSignUpData = async (req) => {
   }
 };
 
-module.exports = { validateSignUpData };
+const validatePasswordChange = (req) => {
+  const { oldPassword, newPassword, confirmNewPassword } = req.body;
+  if (!(newPassword === confirmNewPassword)) {
+    throw new Error("Passwords don't match");
+  } else if (newPassword === oldPassword) {
+    throw new Error("You can't change it to the old password");
+  } else if (!validator.isStrongPassword(newPassword)) {
+    throw new Error("Please enter a strong password");
+  }
+};
+
+const validateEditFields = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "about",
+    "skills",
+    "age",
+    "gender",
+    "photoURL",
+  ];
+
+  const isEditAllowed = Object.keys(req.body).every((field) =>
+    allowedEditFields.includes(field)
+  );
+
+  return isEditAllowed;
+};
+module.exports = {
+  validateSignUpData,
+  validateEditFields,
+  validatePasswordChange,
+};
