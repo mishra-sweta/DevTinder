@@ -1,7 +1,7 @@
 const express = require("express");
-const User = require("../models/user");
 const ConnectionRequest = require("../models/connectionRequest");
 const { userAuth } = require("../middleware/auth");
+const User = require("../models/user");
 const userRouter = express.Router();
 
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
@@ -11,7 +11,13 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
     const pendingRequests = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "interested",
-    }).populate("fromUserId", ["firstName", "lastName", "photoUrl", "gender"]);
+    }).populate("fromUserId", [
+      "firstName",
+      "lastName",
+      "photoUrl",
+      "gender",
+      "skills",
+    ]);
 
     if (pendingRequests.length === 0) {
       res.status(400).send("No pending requests");
@@ -25,7 +31,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   }
 });
 
-userRouter.get("user/connections", userAuth, async (req, res) => {
+userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
@@ -34,11 +40,58 @@ userRouter.get("user/connections", userAuth, async (req, res) => {
         { fromUserId: loggedInUser._id, status: "accepted" },
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
+    })
+      .populate("fromUserId", [
+        "firstName",
+        "lastName",
+        "photoUrl",
+        "gender",
+        "skills",
+      ])
+      .populate("toUserId", "firstName lastName photoUrl gender skills")
+      .lean();
+
+    const data = connections.map((conn) => {
+      if (conn.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return conn.toUserId;
+      }
+
+      return conn.fromUserId;
     });
 
-    res.json({ messages: "My connections", data: connections });
+    res.json({ messages: "My connections", data: data });
   } catch (error) {
     res.status(400).send("Error : ", error.message);
+  }
+});
+
+userRouter.get("/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    //find all connection req I have sent or reject
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+
+    const hideUsersFromFeed = new Set();
+    connectionRequests.forEach((conn) => {
+      hideUsersFromFeed.add(conn.fromUserId.toString());
+      hideUsersFromFeed.add(conn.toUserId.toString());
+    });
+
+    const feed = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUsersFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    }).select(["firstName", "lastName", "photoUrl", "gender", "skills"]);
+
+    res.send(feed);
+
+    //all the cards in db - except their own, profiles they have connected with, profile they have ignored, already sent connection request to
+  } catch (error) {
+    res.status(400).send("ERROR : ", error.message);
   }
 });
 
