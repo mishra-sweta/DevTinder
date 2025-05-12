@@ -14,10 +14,9 @@ profileRouter
 
 connectionRequestRouter
 
-- POST /request/send/interested/:userId
-- POST /request/send/ignored/:userId
-- POST /request/review/accepted/:userId
-- POST /request/review/rejec ted/:userId
+- POST /request/send/:status/:userId - interested, ignored
+
+- POST /request/review/:status/:userId - accepted, rejected
 
 userRouter
 
@@ -25,4 +24,9 @@ userRouter
 - GET /user/requests/received
 - GET /user/feed - Gets you the profiles of other users on platforms
 
-Status: ignore, interested, accepted, rejected
+Status: ignored, interested, accepted, rejected
+
+toUser and fromUser not sending to eachother and again and again
+toUserId exists in database
+status is interested and ignored
+schema pre - save for avoiding sending request to youself
