@@ -57,8 +57,7 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      default:
-        "https://i.pinimg.com/474x/14/90/37/14903760921cb84b305290a3ad4f596c.jpg",
+      default: "https://cdn-icons-png.flaticon.com/512/12225/12225935.png",
       validate: {
         validator: function (v) {
           return validator.isURL(v) && /\.(jpg|jpeg|png|webp|gif)$/i.test(v);

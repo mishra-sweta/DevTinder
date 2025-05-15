@@ -10,15 +10,19 @@ const cors = require("cors");
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 app.use(authRouter);
-app.use(profileRouter);
+app.use("/profile", profileRouter);
 app.use(requestsRouter);
 app.use(userRouter);
 
@@ -30,5 +34,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.log("Couldn't connect to database");
+    console.log("Couldn't connect to database", err);
   });

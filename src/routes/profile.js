@@ -7,7 +7,7 @@ const {
 } = require("../utils/validation");
 const { userAuth } = require("../middleware/auth");
 
-profileRouter.get("/profile/view", userAuth, async (req, res) => {
+profileRouter.get("/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
 
@@ -17,33 +17,34 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.put("/edit", userAuth, async (req, res) => {
   try {
+    console.log(req.body);
     const areFieldsValid = validateEditFields(req);
+    console.log(areFieldsValid);
 
     if (!areFieldsValid) {
-      throw new Error("Update of fields not permitted");
-    } else {
-      const user = req.user;
-      const loggedInUser = user;
-
-      Object.keys(req.body).forEach(
-        (field) => (loggedInUser[field] = req.body[field])
-      );
-
-      await loggedInUser.save();
-
-      res.json({
-        message: `${user.firstName}, profile's updated successfully`,
-        data: loggedInUser,
-      });
+      return res.status(400).send("Update of fields not permitted");
     }
+
+    const user = req.user;
+
+    Object.keys(req.body).forEach((field) => {
+      user[field] = req.body[field];
+    });
+
+    await user.save();
+
+    res.json({
+      message: `${user.firstName}, profile updated successfully`,
+      data: user,
+    });
   } catch (error) {
     res.status(400).send("ERROR: " + error.message);
   }
 });
 
-profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+profileRouter.put("/password", userAuth, async (req, res) => {
   try {
     const user = req.user;
     const { oldPassword, newPassword } = req.body;
