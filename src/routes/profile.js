@@ -19,9 +19,7 @@ profileRouter.get("/view", userAuth, async (req, res) => {
 
 profileRouter.put("/edit", userAuth, async (req, res) => {
   try {
-    console.log(req.body);
     const areFieldsValid = validateEditFields(req);
-    console.log(areFieldsValid);
 
     if (!areFieldsValid) {
       return res.status(400).send("Update of fields not permitted");

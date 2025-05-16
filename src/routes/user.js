@@ -2,6 +2,7 @@ const express = require("express");
 const ConnectionRequest = require("../models/connectionRequest");
 const { userAuth } = require("../middleware/auth");
 const User = require("../models/user");
+const { isAbaRouting } = require("validator");
 const userRouter = express.Router();
 
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
@@ -46,6 +47,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         "lastName",
         "photoUrl",
         "gender",
+        "age",
+        "about",
         "skills",
       ])
       .populate("toUserId", "firstName lastName photoUrl gender skills")
