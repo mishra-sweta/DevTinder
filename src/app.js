@@ -11,7 +11,7 @@ const cors = require("cors");
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-  origin: "*",
+  origin: "https://usedevtinder.netlify.app/",
   credentials: true,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
