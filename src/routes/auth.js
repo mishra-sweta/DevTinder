@@ -22,6 +22,9 @@ authRouter.post("/signup", async (req, res) => {
     //Add the token to a cookie and send the cookie in response to  user
     res.cookie("token", token, {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
     });
     res.send(savedUser);
   } catch (error) {
@@ -44,6 +47,9 @@ authRouter.post("/login", async (req, res) => {
       //Add the token to a cookie and send the cookie in response to  user
       res.cookie("token", token, {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
       });
       res.send(user);
     } else {
