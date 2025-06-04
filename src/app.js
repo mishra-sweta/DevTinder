@@ -7,6 +7,8 @@ const profileRouter = require("./routes/profile");
 const requestsRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+const http = require("http");
+const initialiseSocket = require("./utils/socket");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -19,6 +21,9 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
+const server = http.createServer(app);
+initialiseSocket(server);
+
 app.use(cors(corsOptions));
 
 app.use(authRouter);
@@ -29,7 +34,7 @@ app.use(userRouter);
 connectDB()
   .then(() => {
     console.log("Connected to the database...");
-    app.listen(3000, () => {
+    server.listen(3000, () => {
       console.log("Server is successfully listening on PORT 3000");
     });
   })
