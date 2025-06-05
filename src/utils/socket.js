@@ -8,7 +8,17 @@ const initialiseSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    //Handle events
+    socket.on("joinChat", ({ firstName, userId, targetId }) => {
+      const roomId = [userId, targetId].sort().join("_");
+      console.log(firstName + " Joined Room " + roomId);
+      socket.join(roomId);
+    });
+    socket.on("sendMessage", ({ firstName, userId, targetId, text }) => {
+      const roomId = [userId, targetId].sort().join("_");
+      console.log(firstName + " " + text);
+      io.to(roomId).emit("messageReceived", { firstName, text });
+    });
+    socket.on("disconnect", () => {});
   });
 };
 

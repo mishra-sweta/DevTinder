@@ -13,7 +13,7 @@ const initialiseSocket = require("./utils/socket");
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-  origin: "https://usedevtinder.netlify.app/",
+  origin: ["https://usedevtinder.netlify.app", "http://localhost:5173"],
   credentials: true,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
